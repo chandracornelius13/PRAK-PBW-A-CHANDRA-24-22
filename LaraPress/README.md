@@ -1,4 +1,4 @@
-# 📘 Laporan Praktikum Pertemuan Ke - 5
+# 📘 Laporan Praktikum Pertemuan Ke - 2
 
 🧑‍🎓 Chandra Cornelius L Tobing - 4524210022
 
