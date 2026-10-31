@@ -51,6 +51,13 @@ class BookResource extends Resource
                                     ->required()
                                     ->maxLength(255),
                             ]),
+
+                        Forms\Components\Select::make('categories')
+                            ->label('Kategori Buku')
+                            ->multiple()
+                            ->relationship('categories', 'name')
+                            ->preload()
+                            ->searchable(),
                         
                         Forms\Components\TextInput::make('publisher')
                             ->maxLength(255),

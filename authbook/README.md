@@ -1,58 +1,289 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Laporan Praktikum Laravel dan Filament
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+## 1. Penjelasan Arsitektur (7 Poin)
 
-## About Laravel
+### 1.1 Deskripsi Aplikasi
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+Aplikasi ini merupakan sistem manajemen perpustakaan sederhana yang dikembangkan menggunakan framework Laravel dan Filament.
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+Aplikasi digunakan untuk mengelola data buku dan penulis, mengatur hak akses pengguna berdasarkan role, menampilkan statistik perpustakaan, serta mengelompokkan buku berdasarkan kategori.
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+Teknologi yang digunakan:
 
-## Learning Laravel
+| Teknologi | Kegunaan |
+|---|---|
+| Laravel 13 | Backend framework |
+| PHP 8.3 | Bahasa pemrograman |
+| Filament 3 | Admin panel dan CRUD |
+| SQLite | Database |
+| Eloquent ORM | Pengelolaan relasi dan query database |
+| Blade / Livewire | Tampilan dan interaksi aplikasi |
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+### 1.2 Entity Relationship Diagram (ERD)
 
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+Berikut merupakan gambaran hubungan antar tabel dalam aplikasi:
 
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
+```mermaid
+erDiagram
+    USERS {
+        bigint id PK
+        string name
+        string email
+        string password
+        string role
+    }
 
-## Agentic Development
+    AUTHORS {
+        bigint id PK
+        string name
+        timestamps created_at
+    }
 
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
+    BOOKS {
+        bigint id PK
+        string isbn
+        string title
+        bigint author_id FK
+        string publisher
+        integer year
+        string cover
+        string status
+        text description
+    }
 
-```bash
-composer require laravel/boost --dev
+    CATEGORIES {
+        bigint id PK
+        string name
+        timestamps created_at
+    }
 
-php artisan boost:install
+    BOOK_CATEGORY {
+        bigint id PK
+        bigint book_id FK
+        bigint category_id FK
+    }
+
+    AUTHORS ||--o{ BOOKS : writes
+    BOOKS ||--o{ BOOK_CATEGORY : has
+    CATEGORIES ||--o{ BOOK_CATEGORY : contains
 ```
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
+### 1.3 Penjelasan Relasi Antar Tabel
 
-## Contributing
+Aplikasi memiliki beberapa tabel utama, yaitu:
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+**1. Tabel Users**
 
-## Code of Conduct
+Menyimpan informasi pengguna yang dapat mengakses admin panel. Setiap pengguna memiliki role untuk menentukan hak aksesnya.
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+Role yang digunakan:
+- Admin: memiliki akses penuh terhadap pengelolaan data.
+- Staff: dapat melihat, menambahkan, dan mengubah data buku, tetapi tidak dapat menghapusnya.
+- Viewer: hanya dapat melihat data.
 
-## Security Vulnerabilities
+**2. Tabel Authors**
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+Menyimpan informasi penulis buku. Satu penulis dapat memiliki banyak buku.
 
-## License
+Relasi: One to Many (1:N).
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+**3. Tabel Books**
+
+Menyimpan informasi buku, seperti ISBN, judul, penulis, penerbit, tahun terbit, status, cover, dan deskripsi.
+
+Setiap buku memiliki satu penulis melalui kolom `author_id`.
+
+**4. Tabel Categories**
+
+Menyimpan daftar kategori buku, seperti Novel, Romance, Technology, Education, dan Science.
+
+**5. Tabel Book_Category**
+
+Merupakan tabel pivot yang menghubungkan tabel Books dan Categories.
+
+Relasi: Many to Many (N:N).
+
+Satu buku dapat memiliki beberapa kategori dan satu kategori dapat digunakan oleh banyak buku.
+
+### 1.4 Penjelasan Flow Aplikasi
+
+Alur kerja aplikasi dimulai ketika pengguna mengakses aplikasi melalui browser.
+
+Berikut alur request hingga response:
+
+```mermaid
+flowchart TD
+    A["User mengakses aplikasi"] --> B["Browser mengirim HTTP Request"]
+    B --> C["Laravel Routing"]
+    C --> D["Middleware / Authentication"]
+    D --> E["Filament Admin Panel"]
+    E --> F["Resource / Widget"]
+    F --> G["Eloquent ORM"]
+    G --> H[("Database SQLite")]
+    H --> G
+    G --> F
+    F --> I["Laravel mengirim Response"]
+    I --> J["Browser menampilkan halaman"]
+```
+
+Penjelasan alur:
+
+1. Pengguna membuka aplikasi melalui browser.
+2. Browser mengirimkan HTTP Request ke aplikasi Laravel.
+3. Laravel memproses request melalui routing dan middleware.
+4. Middleware memeriksa autentikasi dan hak akses pengguna.
+5. Filament menangani tampilan admin panel, resource, dan widget.
+6. Eloquent ORM menjalankan query untuk mengambil atau mengubah data.
+7. Database SQLite menyimpan dan mengembalikan data.
+8. Hasil pemrosesan ditampilkan kembali kepada pengguna melalui browser.
+
+---
+
+## 2. Perbandingan dengan Pendekatan Tradisional (7 Poin)
+
+### 2.1 Perbandingan CRUD Filament vs Manual
+
+Dalam pengembangan aplikasi Laravel, CRUD (Create, Read, Update, Delete) dapat dibuat menggunakan Filament maupun secara manual.
+
+| Aspek | Filament | Manual Laravel |
+|---|---|---|
+| Pembuatan CRUD | Menggunakan Resource | Membuat Controller, Route, dan View |
+| Form | Menggunakan komponen form | Membuat form HTML sendiri |
+| Tabel | Menggunakan Table Builder | Membuat tabel secara manual |
+| Validasi | Menggunakan aturan validasi komponen | Menggunakan Laravel Validator |
+| Tampilan | Komponen admin panel sudah tersedia | Desain ditentukan developer |
+| Waktu pengembangan | Relatif lebih cepat | Membutuhkan lebih banyak waktu |
+| Fleksibilitas | Mengikuti struktur dan kemampuan Filament | Lebih bebas dikembangkan |
+
+### 2.2 Kelebihan dan Kekurangan Filament
+
+**Kelebihan:**
+- Mempercepat proses pembuatan CRUD.
+- Menyediakan komponen form dan tabel yang siap digunakan.
+- Memiliki fitur pencarian, filter, pagination, dan action.
+- Menyediakan dashboard dan widget.
+- Memiliki integrasi dengan Laravel Eloquent.
+
+**Kekurangan:**
+- Struktur pengembangan mengikuti pola yang disediakan Filament.
+- Membutuhkan pemahaman mengenai komponen dan konfigurasi Filament.
+- Kustomisasi tertentu dapat membutuhkan pemahaman lebih lanjut.
+- Kurang cocok apabila membutuhkan tampilan frontend yang sangat berbeda dari admin panel.
+
+### 2.3 Kelebihan dan Kekurangan Pendekatan Manual
+
+**Kelebihan:**
+- Memiliki kebebasan penuh dalam menentukan desain dan alur aplikasi.
+- Lebih fleksibel untuk kebutuhan bisnis yang kompleks.
+- Membantu developer memahami proses kerja Laravel secara lebih mendalam.
+
+**Kekurangan:**
+- Membutuhkan waktu pengembangan lebih lama.
+- Harus membuat tampilan form dan tabel sendiri.
+- Harus mengatur validasi, pagination, pencarian, dan fitur lainnya.
+- Kode yang dibuat bisa menjadi lebih banyak.
+
+### 2.4 Kapan Sebaiknya Menggunakan Filament dan Manual?
+
+**Menggunakan Filament apabila:**
+- Membutuhkan admin panel dalam waktu singkat.
+- Mengembangkan aplikasi manajemen data.
+- Membutuhkan CRUD dengan fitur standar.
+- Membuat dashboard internal untuk admin atau staff.
+
+**Menggunakan pendekatan manual apabila:**
+- Membutuhkan desain frontend yang sangat khusus.
+- Memiliki alur bisnis yang kompleks.
+- Membutuhkan kontrol penuh terhadap tampilan dan interaksi pengguna.
+- Mengembangkan aplikasi yang tidak hanya berfokus pada admin panel.
+
+Kesimpulannya, Filament cocok digunakan untuk mempercepat pengembangan aplikasi administratif, sedangkan pendekatan manual lebih sesuai ketika fleksibilitas dan kustomisasi menjadi prioritas utama.
+
+---
+
+## 3. Refleksi Pembelajaran (6 Poin)
+
+### 3.1 Apa yang Dipelajari dari Praktikum Ini?
+
+Melalui praktikum ini, saya mendapatkan pengalaman dalam mengembangkan aplikasi menggunakan Laravel dan Filament.
+
+Beberapa hal yang saya pelajari antara lain:
+
+1. Memahami struktur project Laravel, termasuk Model, Migration, Seeder, dan konfigurasi aplikasi.
+2. Membuat CRUD menggunakan Filament Resource.
+3. Memahami penggunaan Eloquent ORM untuk mengelola data dan relasi antar tabel.
+4. Menerapkan autentikasi dan pembatasan hak akses pengguna menggunakan role dan Policy.
+5. Membuat dashboard menggunakan Stats Overview Widget dan Chart Widget.
+6. Membuat relasi One to Many dan Many to Many pada database.
+7. Mengelola perubahan database menggunakan Migration dan Seeder.
+8. Menggunakan Git dan GitHub untuk menyimpan serta mengelola source code project.
+
+### 3.2 Kesulitan yang Dihadapi dan Cara Mengatasinya
+
+Selama mengerjakan praktikum, terdapat beberapa kendala yang saya hadapi.
+
+**1. Kesalahan konfigurasi dan import class**
+
+Saya sempat mengalami error ketika menggunakan model Book pada widget grafik karena class belum di-import dengan benar.
+
+Cara mengatasinya adalah menambahkan import model yang sesuai pada bagian atas file PHP.
+
+**2. Kesalahan pada Policy**
+
+Saya mengalami error pada AuthorPolicy karena penggunaan tipe data Author yang mengarah ke namespace yang salah.
+
+Cara mengatasinya adalah memperbaiki import model Author menggunakan namespace `App\Models\Author`.
+
+**3. Pengelolaan database antar komputer**
+
+Ketika project dipindahkan ke komputer lain melalui GitHub, struktur database dan data yang tersimpan tidak otomatis ikut berpindah.
+
+Cara mengatasinya adalah menjalankan migration dan seeder pada komputer tujuan agar struktur tabel dan data awal dapat dibuat kembali.
+
+**4. Kesalahan menggunakan Migration Fresh**
+
+Saya sempat menggunakan perintah `php artisan migrate:fresh` yang menyebabkan seluruh tabel dan data dalam database terhapus.
+
+Dari kejadian tersebut, saya memahami perbedaan antara `migrate` dan `migrate:fresh`. Untuk menjalankan migration baru tanpa menghapus data sebelumnya, saya menggunakan `php artisan migrate`.
+
+### 3.3 Rencana Pengembangan Aplikasi Selanjutnya
+
+Aplikasi manajemen perpustakaan ini masih dapat dikembangkan dengan beberapa fitur tambahan, antara lain:
+
+1. **Sistem Peminjaman Buku:** Menambahkan fitur peminjaman dan pengembalian buku.
+2. **Manajemen Stok:** Mengelola jumlah buku yang tersedia dan sedang dipinjam.
+3. **Riwayat Peminjaman:** Menampilkan riwayat transaksi peminjaman setiap pengguna.
+4. **Pencarian dan Filter:** Menambahkan pencarian berdasarkan judul, penulis, dan kategori.
+5. **Laporan Perpustakaan:** Menambahkan fitur export laporan ke PDF atau Excel.
+6. **Pengembangan Tampilan:** Membuat halaman frontend yang dapat digunakan oleh pengunjung perpustakaan tanpa harus masuk ke admin panel.
+
+---
+
+## 4. Kesimpulan
+
+Berdasarkan praktikum yang telah dilakukan, Laravel dan Filament dapat digunakan untuk membangun aplikasi manajemen data dengan lebih cepat dan terstruktur.
+
+Filament membantu proses pembuatan CRUD, pengelolaan data, serta dashboard tanpa harus membangun seluruh komponen dari awal.
+
+Selain mempelajari penggunaan framework, praktikum ini juga memberikan pemahaman mengenai relasi database, autentikasi, authorization, migration, seeder, dan pengelolaan source code menggunakan GitHub.
+
+Dengan demikian, aplikasi yang telah dibuat dapat menjadi dasar untuk pengembangan sistem manajemen perpustakaan yang lebih lengkap.
+
+---
+
+## 5. Dokumentasi Aplikasi
+
+Tambahkan screenshot hasil praktikum pada bagian ini sebagai bukti implementasi.
+
+| No. | Dokumentasi | Screenshot |
+|---|---|---|
+| 1 | Halaman Login | <img src="docs/images/login.png" width="400"> |
+| 2 | Dashboard Statistik | <img src="docs/images/dashboard.png" width="400"> |
+| 3 | Data Buku | <img src="docs/images/buku.png" width="400"> |
+| 4 | Data Penulis | <img src="docs/images/penulis.png" width="400"> |
+| 5 | Form Buku dan Kategori | <img src="docs/images/kategori.png" width="400"> |
+| 6 | Grafik Status Buku | <img src="docs/images/grafik.png" width="400"> |
+
+---
+
+**Dikembangkan menggunakan Laravel dan Filament.**  
