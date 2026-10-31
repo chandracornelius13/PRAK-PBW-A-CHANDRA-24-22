@@ -9,6 +9,7 @@ use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Filament\Forms\Components\Textarea;
 
 class BookResource extends Resource
 {
@@ -33,6 +34,12 @@ class BookResource extends Resource
                         Forms\Components\TextInput::make('title')
                             ->required()
                             ->maxLength(255),
+
+                            Textarea::make('description')
+                                 ->label('Description')
+                                 ->placeholder('Masukkan deskripsi buku...')
+                                 ->rows(4)
+                                 ->columnSpanFull(),
                         
                         Forms\Components\Select::make('author_id')
                             ->relationship('author', 'name')

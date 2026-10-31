@@ -18,6 +18,7 @@ class Book extends Model
         'year',
         'cover',
         'status',
+        'description',
     ];
 
     protected $casts = [
